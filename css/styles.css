@@ -33,3 +33,4 @@ table{border-collapse:collapse;width:100%}td,th{border:1px solid var(--line);pad
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .ctrl .chk{display:flex;align-items:center;gap:.4rem;align-self:end}.nota{font-size:.85rem;opacity:.85}th[scope=row]{width:55%}
 #form-acceso label{display:grid;gap:.2rem;font-weight:600;margin:.5rem 0}input[type=email],input[type=password]{width:100%;max-width:22rem}.scroll{overflow-x:auto}.quien{display:flex;gap:.5rem;align-items:center;font-size:.9rem}
+.leo-cab{display:flex;align-items:center;gap:.8rem}.leo-img{flex:none}.leo-cab h2{margin:0}textarea{font:inherit;width:100%;padding:.4rem;border:1px solid var(--line);border-radius:6px;background:var(--paper);color:var(--ink)}.leo-ia label{display:grid;gap:.2rem;font-weight:600;font-size:.9rem;margin:.4rem 0}.leo-resp{white-space:pre-wrap}

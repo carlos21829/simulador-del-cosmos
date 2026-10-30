@@ -29,6 +29,7 @@ export async function entrar(email, clave) {
     return await cargarPerfil(data.user);
   } catch { return { error: 'No hay conexión con el servicio. Inténtalo de nuevo.' }; }
 }
+export async function token() { try { const { data } = await sb.auth.getSession(); return data.session ? data.session.access_token : null; } catch { return null; } }
 export async function salir() { try { await sb.auth.signOut(); } catch {} user = null; }
 export async function leerProgreso() {
   try { const { data } = await sb.from('progreso').select('estado').eq('user_id', user.id).maybeSingle(); return data ? data.estado : null; } catch { return null; }

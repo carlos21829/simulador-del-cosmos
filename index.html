@@ -68,11 +68,18 @@
       </ol>
     </div>
     <aside class="leo">
-      <h2>Hola, soy L.E.O.</h2>
+      <div class="leo-cab"><img class="leo-img" src="./assets/leo.svg" alt="Robot L.E.O., el tutor de la estación" width="88" height="88"><h2>Hola, soy L.E.O.</h2></div>
       <p>Soy un tutor basado en reglas: te doy pistas, no respuestas. ¿Listo para continuar?</p>
       <button class="btn" data-go="siguiente">Comenzar misión</button>
       <button class="btn alt" data-go="aprender">Ver manual</button>
       <p class="tip">Tip: en caída libre ideal, la masa no aparece en la ecuación del tiempo.</p>
+      <form id="leo-form" class="leo-ia">
+        <label>Pregúntale a L.E.O. (IA)<textarea id="leo-pregunta" rows="3" maxlength="400" placeholder="Escribe tu duda de Física"></textarea></label>
+        <label>Tema <select id="leo-mision"><option value="1">Misión 1 · Caída libre</option><option value="2">Misión 2 · Tiro parabólico</option><option value="3">Misión 3 · Colisiones</option></select></label>
+        <button class="btn alt" id="leo-enviar" type="submit">Preguntar</button>
+        <p id="leo-resp" class="leo-resp" aria-live="polite"></p>
+        <p class="nota">Respuestas generadas por IA (Gemini): pueden contener errores. Verifica siempre con el simulador. No escribas datos personales.</p>
+      </form>
     </aside>
   </div>
 </section>
@@ -228,7 +235,7 @@
 
 <section id="v-creditos" class="view" hidden>
   <h1>Créditos y límites</h1>
-  <p>Simulador del Cosmos · Proyecto académico de Física General. Tutor L.E.O.: versión de demostración basada en reglas, sin modelo de IA generativa conectado.</p>
+  <p>Simulador del Cosmos · Proyecto académico de Física General. Tutor L.E.O.: pistas y diagnósticos basados en reglas; además, consulta opcional a un modelo de IA generativa (Gemini) cuando hay sesión iniciada y el servicio está disponible. La IA puede equivocarse: verifica con el simulador.</p>
   <p>Con cuenta, el progreso se guarda en la base de datos del proyecto (Supabase) y en este navegador; en modo local, solo en este navegador. Los puntos se calculan en el navegador, por lo que esta herramienta didáctica no es a prueba de manipulación.</p>
   <button class="btn alt" id="borrar">Borrar mi progreso</button>
 </section>

@@ -3,6 +3,7 @@ import { cargar, guardar, otorgar, reiniciar, normalizar, usarUsuario } from './
 import * as nube from './cloud.js';
 import { iniciarMision2 } from './missions/mission-2.js';
 import { iniciarMision3 } from './missions/mission-3.js';
+import { iniciarLeoIA } from './leo-ia.js';
 
 const $ = (s) => document.querySelector(s);
 const fmt = (x, d = 2) => x.toFixed(d).replace('.', ',');
@@ -148,7 +149,7 @@ $('#comprobar').onclick = () => {
 $('#borrar').onclick = () => { if (confirm('¿Borrar todo tu progreso?')) { S = reiniciar(); guardarTodo(); pintarMapa(); } };
 
 const juego = { get S() { return S; }, repintar: () => { guardarTodo(); } };
-iniciarMision2(juego); iniciarMision3(juego);
+iniciarMision2(juego); iniciarMision3(juego); iniciarLeoIA(juego);
 
 // ---- Acceso, roles y nube ----
 let tSync;
