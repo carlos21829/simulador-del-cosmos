@@ -15,6 +15,7 @@
     <button data-go="mapa">Inicio</button>
     <button data-go="aprender">Aprender</button>
     <button data-go="mision">Misión 1</button>
+    <button data-go="mision2">Misión 2</button>
     <button data-go="creditos">Créditos</button>
   </nav>
   <div class="pr">Puntos de Realidad: <strong id="pr">0</strong> PR</div>
@@ -41,17 +42,19 @@
     <div>
       <h1>Mapa de aventura · Estación Aether</h1>
       <p>Completa cada misión para desbloquear la siguiente.</p>
+      <p id="aviso" class="err" role="status"></p>
       <ol class="nodes">
         <li><span class="planet p1" aria-hidden="true"></span><div><strong>Nivel 1 · Gravedad</strong> <span class="badge" id="b1"></span>
           <progress id="pg1" max="100" value="0" aria-label="Progreso del nivel 1"></progress></div></li>
-        <li><span class="planet p2" aria-hidden="true"></span><div><strong>Nivel 2 · Tiro parabólico</strong> <span class="badge" id="b2"></span></div></li>
+        <li><span class="planet p2" aria-hidden="true"></span><div><strong>Nivel 2 · Tiro parabólico</strong> <span class="badge" id="b2"></span>
+          <progress id="pg2" max="100" value="0" aria-label="Progreso del nivel 2"></progress></div></li>
         <li><span class="planet p3" aria-hidden="true"></span><div><strong>Nivel 3 · Colisión espacial</strong> <span class="badge" id="b3"></span></div></li>
       </ol>
     </div>
     <aside class="leo">
       <h2>Hola, soy L.E.O.</h2>
       <p>Soy un tutor basado en reglas: te doy pistas, no respuestas. ¿Listo para continuar?</p>
-      <button class="btn" data-go="mision">Comenzar misión</button>
+      <button class="btn" data-go="siguiente">Comenzar misión</button>
       <button class="btn alt" data-go="aprender">Ver manual</button>
       <p class="tip">Tip: en caída libre ideal, la masa no aparece en la ecuación del tiempo.</p>
     </aside>
@@ -68,6 +71,9 @@
     <tr><td>Tierra</td><td>9,81</td></tr><tr><td>Luna</td><td>1,62</td></tr><tr><td>Júpiter</td><td>24,79</td></tr>
   </table>
   <p>Límite del modelo: se ignora la resistencia del aire. Con aire, la masa y la forma sí influirían (otro modelo).</p>
+  <h2>Tiro parabólico</h2>
+  <p>Componentes: vx = v0·cos θ, vy = v0·sen θ (θ en grados). Horizontal: x = vx·t. Vertical: y = h0 + vy·t − ½·g·t².</p>
+  <p>Tiempo de vuelo: t = (vy + √(vy² + 2·g·h0)) / g. Alcance = vx·t. Altura máxima = h0 + vy²/(2g). La fórmula R = v0²·sen 2θ / g solo vale si h0 = 0.</p>
 </section>
 
 <section id="v-mision" class="view" hidden>
@@ -112,6 +118,44 @@
       <input id="pred" type="text" inputmode="decimal" placeholder="ej. 5,2"></label>
     <button class="btn" id="comprobar">Comprobar</button>
     <div id="fb" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="v-mision2" class="view" hidden>
+  <h1>Misión 2 · El ángulo perfecto</h1>
+  <p>Envía el proyectil a la zona de aterrizaje por encima del obstáculo (a 50 m de distancia y 15 m de altura). La zona es el objetivo ± 5 m.</p>
+  <div class="lab">
+    <div>
+      <div class="ctrl">
+        <label>Planeta <select id="pl2"><option value="tierra">Tierra (9,81 m/s²)</option><option value="luna">Luna (1,62 m/s²)</option><option value="jupiter">Júpiter (24,79 m/s²)</option></select></label>
+        <label>Velocidad inicial (m/s) <input id="v0" type="number" step="any" value="30"></label>
+        <label>Ángulo (°) <input id="ang" type="number" step="any" value="45"></label>
+        <label>Altura inicial (m) <input id="h02" type="number" step="any" value="0"></label>
+        <label>Objetivo (m) <input id="xT" type="number" step="any" value="120"></label>
+        <label class="chk"><input id="aire" type="checkbox"> Resistencia del aire</label>
+      </div>
+      <p id="err2" class="err" role="alert"></p>
+      <div class="ctrl"><button class="btn" id="lanzar">Lanzar</button><button class="btn alt" id="reset2">Reiniciar</button></div>
+      <canvas id="cv2" width="640" height="320" role="img" aria-label="Trayectoria del proyectil con obstáculo y zona objetivo"></canvas>
+      <p id="est2" aria-live="polite">Estado: pendiente. Ajusta los datos y pulsa «Lanzar».</p>
+      <p class="nota">Sin aire: parabólico ideal con g constante. Con aire: arrastre cuadrático a = −c·|v|·v con c = 0,002 m⁻¹, densidad constante; es un modelo simplificado, no una atmósfera realista. La línea discontinua muestra la trayectoria ideal.</p>
+    </div>
+    <div>
+      <table><caption>Datos en vivo</caption>
+        <tr><th scope="row">Tiempo</th><td id="d2t">–</td></tr><tr><th scope="row">Posición x</th><td id="d2x">–</td></tr>
+        <tr><th scope="row">Altura y</th><td id="d2y">–</td></tr><tr><th scope="row">Velocidad horizontal vx</th><td id="d2vx">–</td></tr>
+        <tr><th scope="row">Velocidad vertical vy</th><td id="d2vy">–</td></tr>
+      </table>
+      <p id="ini"></p>
+      <p id="res2"></p>
+    </div>
+  </div>
+  <div class="block">
+    <h2>Reto de verificación</h2>
+    <label>Predice el alcance horizontal (m) para v0 = 25 m/s, ángulo 40°, altura inicial 10 m, en la Tierra, sin aire:
+      <input id="pred2" type="text" inputmode="decimal" placeholder="ej. 70,5"></label>
+    <button class="btn" id="comprobar2">Comprobar</button>
+    <div id="fb2" aria-live="polite"></div>
   </div>
 </section>
 

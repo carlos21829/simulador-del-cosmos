@@ -1,5 +1,6 @@
 import { GRAVEDAD, tiempoCaida, estado, validar } from './physics/free-fall.js';
 import { cargar, guardar, otorgar, reiniciar } from './game-state.js';
+import { iniciarMision2 } from './missions/mission-2.js';
 
 const $ = (s) => document.querySelector(s);
 const fmt = (x, d = 2) => x.toFixed(d).replace('.', ',');
@@ -8,7 +9,10 @@ const RETO = { h: 80, g: GRAVEDAD.luna.g, tol: 0.03 };
 RETO.t = tiempoCaida(RETO.h, RETO.g);
 
 // ---- Navegación ----
+const avisar = (t) => { const a = $('#aviso'); if (a) a.textContent = t; };
 function ir(v) {
+  if (v === 'siguiente') v = S.m1.completada ? 'mision2' : 'mision';
+  if (v === 'mision2' && !S.m1.completada) { v = 'mapa'; avisar('Completa la Misión 1 para desbloquear la Misión 2.'); } else avisar('');
   document.querySelectorAll('.view').forEach((e) => (e.hidden = e.id !== 'v-' + v));
   document.querySelectorAll('#nav button').forEach((b) =>
     b.dataset.go === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
@@ -22,8 +26,10 @@ function pintarMapa() {
   const m = S.m1, p = Math.round(((m.simulaciones > 0) + m.concepto + m.tiempo) / 3 * 100);
   $('#pg1').value = p;
   $('#b1').textContent = m.completada ? 'Completado' : p ? 'En progreso · ' + p + ' %' : 'Disponible';
-  $('#b2').textContent = m.completada ? 'Desbloqueado · en construcción' : 'Bloqueado';
-  $('#b3').textContent = 'Bloqueado';
+  const n = S.m2, q = Math.round((n.acierto + n.prediccion) / 2 * 100);
+  $('#pg2').value = q;
+  $('#b2').textContent = !m.completada ? 'Bloqueado' : n.completada ? 'Completado' : q ? 'En progreso · ' + q + ' %' : 'Disponible';
+  $('#b3').textContent = n.completada ? 'Desbloqueado · en construcción' : 'Bloqueado';
   pintarPR();
 }
 
@@ -129,4 +135,5 @@ $('#comprobar').onclick = () => {
 };
 $('#borrar').onclick = () => { if (confirm('¿Borrar todo tu progreso?')) { S = reiniciar(); pintarPR(); pintarMapa(); } };
 
+iniciarMision2({ get S() { return S; }, repintar: () => { guardar(S); pintarPR(); } });
 pintarPR(); ir('curso');

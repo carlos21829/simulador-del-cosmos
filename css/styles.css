@@ -31,3 +31,4 @@ canvas{width:100%;height:auto;background:var(--sky);border-radius:8px;margin-top
 table{border-collapse:collapse;width:100%}td,th{border:1px solid var(--line);padding:.35rem .5rem;text-align:left}caption{text-align:left;font-weight:700;padding-bottom:.3rem}
 .err{color:var(--bad);font-weight:700;min-height:1.4em}.fb-ok{color:var(--ok);font-weight:700}.fb-bad{color:var(--bad);font-weight:700}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+.ctrl .chk{display:flex;align-items:center;gap:.4rem;align-self:end}.nota{font-size:.85rem;opacity:.85}th[scope=row]{width:55%}
