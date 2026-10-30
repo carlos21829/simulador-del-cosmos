@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Simulador del Cosmos</title>
+<link rel="stylesheet" href="./css/styles.css">
+</head>
+<body>
+<a class="skip" href="#main">Saltar al contenido</a>
+<header class="top">
+  <strong class="brand">Simulador del Cosmos</strong>
+  <nav id="nav" aria-label="Principal">
+    <button data-go="curso">Asignatura</button>
+    <button data-go="mapa">Inicio</button>
+    <button data-go="aprender">Aprender</button>
+    <button data-go="mision">Misión 1</button>
+    <button data-go="creditos">Créditos</button>
+  </nav>
+  <div class="pr">Puntos de Realidad: <strong id="pr">0</strong> PR</div>
+</header>
+
+<main id="main" tabindex="-1">
+
+<section id="v-curso" class="view">
+  <p class="crumb">Mis asignaturas</p>
+  <h1>Física General</h1>
+  <p>Cinemática y dinámica · Primeros semestres y bachillerato superior</p>
+  <div class="block">
+    <h2>Unidad 1 · Movimiento y fuerzas</h2>
+    <div class="act">
+      <div><strong>Actividad: Simulador del Cosmos</strong>
+      <p>Resuelve misiones en la Estación Aether con ayuda de L.E.O. Tus resultados quedan registrados.</p></div>
+      <button class="btn" data-go="mapa">Abrir actividad</button>
+    </div>
+  </div>
+</section>
+
+<section id="v-mapa" class="view" hidden>
+  <div class="grid">
+    <div>
+      <h1>Mapa de aventura · Estación Aether</h1>
+      <p>Completa cada misión para desbloquear la siguiente.</p>
+      <ol class="nodes">
+        <li><span class="planet p1" aria-hidden="true"></span><div><strong>Nivel 1 · Gravedad</strong> <span class="badge" id="b1"></span>
+          <progress id="pg1" max="100" value="0" aria-label="Progreso del nivel 1"></progress></div></li>
+        <li><span class="planet p2" aria-hidden="true"></span><div><strong>Nivel 2 · Tiro parabólico</strong> <span class="badge" id="b2"></span></div></li>
+        <li><span class="planet p3" aria-hidden="true"></span><div><strong>Nivel 3 · Colisión espacial</strong> <span class="badge" id="b3"></span></div></li>
+      </ol>
+    </div>
+    <aside class="leo">
+      <h2>Hola, soy L.E.O.</h2>
+      <p>Soy un tutor basado en reglas: te doy pistas, no respuestas. ¿Listo para continuar?</p>
+      <button class="btn" data-go="mision">Comenzar misión</button>
+      <button class="btn alt" data-go="aprender">Ver manual</button>
+      <p class="tip">Tip: en caída libre ideal, la masa no aparece en la ecuación del tiempo.</p>
+    </aside>
+  </div>
+</section>
+
+<section id="v-aprender" class="view" hidden>
+  <h1>Manual · Caída libre</h1>
+  <p>En caída libre ideal (sin aire) un objeto soltado desde el reposo cae con aceleración constante <em>g</em>.</p>
+  <p><strong>Altura:</strong> y = h − ½·g·t² &nbsp; <strong>Velocidad:</strong> v = g·t &nbsp; <strong>Tiempo de caída:</strong> t = √(2h/g)</p>
+  <table>
+    <caption>Valores de g usados (m/s²)</caption>
+    <tr><th scope="col">Cuerpo</th><th scope="col">g (m/s²)</th></tr>
+    <tr><td>Tierra</td><td>9,81</td></tr><tr><td>Luna</td><td>1,62</td></tr><tr><td>Júpiter</td><td>24,79</td></tr>
+  </table>
+  <p>Límite del modelo: se ignora la resistencia del aire. Con aire, la masa y la forma sí influirían (otro modelo).</p>
+</section>
+
+<section id="v-mision" class="view" hidden>
+  <h1>Misión 1 · El despertar de la gravedad</h1>
+  <p>La estación calibra su sistema gravitacional. Suelta dos objetos desde la misma altura y compara.</p>
+  <div class="lab">
+    <div>
+      <div class="ctrl">
+        <label>Planeta <select id="planeta"><option value="tierra">Tierra (9,81 m/s²)</option><option value="luna">Luna (1,62 m/s²)</option><option value="jupiter">Júpiter (24,79 m/s²)</option></select></label>
+        <label>Masa A (kg) <input id="mA" type="number" step="any" value="1"></label>
+        <label>Masa B (kg) <input id="mB" type="number" step="any" value="10"></label>
+        <label>Altura (m) <input id="h" type="number" step="any" value="50"></label>
+      </div>
+      <p id="err" class="err" role="alert"></p>
+      <div class="ctrl">
+        <button class="btn" id="soltar">Soltar</button>
+        <button class="btn alt" id="pausa">Pausar</button>
+        <button class="btn alt" id="reset">Reiniciar</button>
+      </div>
+      <canvas id="cv" width="480" height="320" role="img" aria-label="Animación de dos objetos cayendo desde la misma altura"></canvas>
+      <p id="est" aria-live="polite">Estado: pendiente. Pulsa «Soltar».</p>
+    </div>
+    <div>
+      <table id="datos"><caption>Datos de la simulación</caption>
+        <tr><th scope="col">Objeto</th><th scope="col">Masa</th><th scope="col">Altura</th><th scope="col">Velocidad</th></tr>
+        <tr><td>A</td><td id="dmA">–</td><td id="dyA">–</td><td id="dvA">–</td></tr>
+        <tr><td>B</td><td id="dmB">–</td><td id="dyB">–</td><td id="dvB">–</td></tr>
+      </table>
+      <p id="tiem">Tiempo: 0,00 s</p>
+      <p id="res"></p>
+    </div>
+  </div>
+
+  <div class="block">
+    <h2>Reto de verificación</h2>
+    <fieldset><legend>1. Sin aire, si sueltas dos masas distintas desde la misma altura, ¿cuál llega antes?</legend>
+      <label><input type="radio" name="q1" value="mayor"> La de mayor masa</label>
+      <label><input type="radio" name="q1" value="menor"> La de menor masa</label>
+      <label><input type="radio" name="q1" value="igual"> Llegan al mismo tiempo</label>
+    </fieldset>
+    <label>2. Predice el tiempo de caída (s) en la <strong>Luna</strong> desde <strong>80 m</strong>:
+      <input id="pred" type="text" inputmode="decimal" placeholder="ej. 5,2"></label>
+    <button class="btn" id="comprobar">Comprobar</button>
+    <div id="fb" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="v-creditos" class="view" hidden>
+  <h1>Créditos y límites</h1>
+  <p>Simulador del Cosmos · Proyecto académico de Física General. Tutor L.E.O.: versión de demostración basada en reglas, sin modelo de IA generativa conectado.</p>
+  <p>El progreso se guarda solo en este navegador (almacenamiento local) y se pierde si lo borras.</p>
+  <button class="btn alt" id="borrar">Borrar mi progreso</button>
+</section>
+
+</main>
+<script type="module" src="./js/app.js"></script>
+</body>
+</html>
