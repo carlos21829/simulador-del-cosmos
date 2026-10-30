@@ -2,6 +2,6 @@
 // NUNCA pegues aquí la clave "service_role" ni ninguna clave "secret".
 // Mientras tengan los valores de ejemplo, la app funciona en modo local (sin cuentas).
 export const CONFIG = {
-  url: 'https://TU-PROYECTO.supabase.co',
-  anonKey: 'TU_CLAVE_ANON'
+  url: 'https://dgouxvjblonjsspskspp.supabase.co',
+  anonKey: 'sb_publishable_j1W-x9kUsLbLAotdXMbyaQ_jbvtPkkm'
 };
