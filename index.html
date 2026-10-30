@@ -16,14 +16,29 @@
     <button data-go="aprender">Aprender</button>
     <button data-go="mision">Misión 1</button>
     <button data-go="mision2">Misión 2</button>
+    <button data-go="mision3">Misión 3</button>
     <button data-go="creditos">Créditos</button>
+    <button data-go="docente" id="nav-docente" hidden>Panel docente</button>
   </nav>
   <div class="pr">Puntos de Realidad: <strong id="pr">0</strong> PR</div>
+  <div class="quien"><span id="quien"></span> <span id="sync" role="status"></span> <button class="btn alt" id="salir" type="button" hidden>Salir</button></div>
 </header>
 
 <main id="main" tabindex="-1">
 
-<section id="v-curso" class="view">
+<section id="v-acceso" class="view" hidden>
+  <h1>Estación Aether · Acceso</h1>
+  <p id="acc-msg" role="status">Conectando con el servicio…</p>
+  <form id="form-acceso" class="block" hidden>
+    <label>Correo <input id="email" type="email" autocomplete="username" required></label>
+    <label>Contraseña <input id="clave" type="password" autocomplete="current-password" required></label>
+    <p id="acc-err" class="err" role="alert"></p>
+    <button class="btn" id="entrar" type="submit">Entrar</button>
+  </form>
+  <div id="local-box" class="block" hidden><button class="btn" id="btn-local" type="button">Continuar en modo local</button></div>
+</section>
+
+<section id="v-curso" class="view" hidden>
   <p class="crumb">Mis asignaturas</p>
   <h1>Física General</h1>
   <p>Cinemática y dinámica · Primeros semestres y bachillerato superior</p>
@@ -48,7 +63,8 @@
           <progress id="pg1" max="100" value="0" aria-label="Progreso del nivel 1"></progress></div></li>
         <li><span class="planet p2" aria-hidden="true"></span><div><strong>Nivel 2 · Tiro parabólico</strong> <span class="badge" id="b2"></span>
           <progress id="pg2" max="100" value="0" aria-label="Progreso del nivel 2"></progress></div></li>
-        <li><span class="planet p3" aria-hidden="true"></span><div><strong>Nivel 3 · Colisión espacial</strong> <span class="badge" id="b3"></span></div></li>
+        <li><span class="planet p3" aria-hidden="true"></span><div><strong>Nivel 3 · Colisión espacial</strong> <span class="badge" id="b3"></span>
+          <progress id="pg3" max="100" value="0" aria-label="Progreso del nivel 3"></progress></div></li>
       </ol>
     </div>
     <aside class="leo">
@@ -74,6 +90,9 @@
   <h2>Tiro parabólico</h2>
   <p>Componentes: vx = v0·cos θ, vy = v0·sen θ (θ en grados). Horizontal: x = vx·t. Vertical: y = h0 + vy·t − ½·g·t².</p>
   <p>Tiempo de vuelo: t = (vy + √(vy² + 2·g·h0)) / g. Alcance = vx·t. Altura máxima = h0 + vy²/(2g). La fórmula R = v0²·sen 2θ / g solo vale si h0 = 0.</p>
+  <h2>Colisiones</h2>
+  <p>Momento lineal: p = m·v (con signo). Sin fuerzas externas, p total se conserva en todo tipo de colisión. Energía cinética: K = ½·m·v².</p>
+  <p>Elástica ideal: K total se conserva. Inelástica: parte de K se transforma en otras formas de energía. Perfectamente inelástica: los objetos quedan unidos, v = (mA·vA + mB·vB)/(mA + mB).</p>
 </section>
 
 <section id="v-mision" class="view" hidden>
@@ -159,10 +178,58 @@
   </div>
 </section>
 
+<section id="v-mision3" class="view" hidden>
+  <h1>Misión 3 · Colisión espacial</h1>
+  <p>Dos rovers de 4 m de ancho avanzan por una misma línea (eje x, positivo hacia la derecha). A está a la izquierda y B a 40 m. Analiza la colisión antes de autorizar la maniobra.</p>
+  <div class="lab">
+    <div>
+      <div class="ctrl">
+        <label>Tipo de colisión <select id="t3"><option value="elastica">Elástica (e = 1)</option><option value="inelastica">Inelástica</option><option value="perfecta">Perfectamente inelástica (e = 0)</option></select></label>
+        <label>Restitución e (solo inelástica) <input id="e3" type="number" step="any" value="0.5" disabled></label>
+        <label>Masa A (kg) <input id="mA3" type="number" step="any" value="4"></label>
+        <label>Masa B (kg) <input id="mB3" type="number" step="any" value="2"></label>
+        <label>Velocidad de A (m/s) <input id="vA3" type="number" step="any" value="6"></label>
+        <label>Velocidad de B (m/s) <input id="vB3" type="number" step="any" value="0"></label>
+      </div>
+      <p id="err3" class="err" role="alert"></p>
+      <div class="ctrl"><button class="btn" id="lanzar3">Ejecutar</button><button class="btn alt" id="reset3">Reiniciar</button></div>
+      <canvas id="cv3" width="640" height="260" role="img" aria-label="Animación de dos rovers que colisionan, con flechas de velocidad"></canvas>
+      <p id="tiem3">Tiempo: 0,00 s</p>
+      <p id="est3" aria-live="polite">Estado: pendiente. Ajusta los datos y pulsa «Ejecutar».</p>
+      <p class="nota">Modelo: colisión frontal en 1D, sin fricción ni fuerzas externas, impacto instantáneo. El momento lineal se conserva en todos los tipos; la energía cinética solo en la elástica ideal. Los rovers deben acercarse (vA − vB ≥ 1 m/s).</p>
+    </div>
+    <div>
+      <table><caption>Antes y después del impacto</caption>
+        <thead><tr><th scope="col">Magnitud</th><th scope="col">Antes</th><th scope="col">Después</th></tr></thead><tbody id="tb3"></tbody></table>
+      <p id="res3"></p>
+    </div>
+  </div>
+  <div class="block">
+    <h2>Reto de verificación</h2>
+    <fieldset><legend>1. ¿En qué colisiones se conserva la energía cinética total?</legend>
+      <label><input type="radio" name="q3" value="el"> Solo en la elástica ideal</label>
+      <label><input type="radio" name="q3" value="todas"> En todas las colisiones</label>
+      <label><input type="radio" name="q3" value="inel"> Solo en las inelásticas</label>
+    </fieldset>
+    <label>2. A: 3 kg a 8 m/s. B: 5 kg a −2 m/s (viene de frente). Si la colisión es perfectamente inelástica (quedan unidos), predice la velocidad final conjunta (m/s):
+      <input id="pred3" type="text" inputmode="decimal" placeholder="ej. 2,5"></label>
+    <button class="btn" id="comprobar3">Comprobar</button>
+    <div id="fb3" aria-live="polite"></div>
+  </div>
+</section>
+
+<section id="v-docente" class="view" hidden>
+  <h1>Panel docente</h1>
+  <p>Resultados de los estudiantes. Como docente puedes abrir todas las misiones sin completar las anteriores para revisarlas; tu propio progreso no aparece en esta tabla.</p>
+  <button class="btn alt" id="refrescar" type="button">Actualizar</button>
+  <p id="doc-msg" role="status"></p>
+  <div class="scroll"><table id="tabla-doc"></table></div>
+</section>
+
 <section id="v-creditos" class="view" hidden>
   <h1>Créditos y límites</h1>
   <p>Simulador del Cosmos · Proyecto académico de Física General. Tutor L.E.O.: versión de demostración basada en reglas, sin modelo de IA generativa conectado.</p>
-  <p>El progreso se guarda solo en este navegador (almacenamiento local) y se pierde si lo borras.</p>
+  <p>Con cuenta, el progreso se guarda en la base de datos del proyecto (Supabase) y en este navegador; en modo local, solo en este navegador. Los puntos se calculan en el navegador, por lo que esta herramienta didáctica no es a prueba de manipulación.</p>
   <button class="btn alt" id="borrar">Borrar mi progreso</button>
 </section>
 

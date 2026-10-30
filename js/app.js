@@ -1,26 +1,36 @@
 import { GRAVEDAD, tiempoCaida, estado, validar } from './physics/free-fall.js';
-import { cargar, guardar, otorgar, reiniciar } from './game-state.js';
+import { cargar, guardar, otorgar, reiniciar, normalizar, usarUsuario } from './game-state.js';
+import * as nube from './cloud.js';
 import { iniciarMision2 } from './missions/mission-2.js';
+import { iniciarMision3 } from './missions/mission-3.js';
 
 const $ = (s) => document.querySelector(s);
 const fmt = (x, d = 2) => x.toFixed(d).replace('.', ',');
 let S = cargar();
+let acceso = false, docente = false;
 const RETO = { h: 80, g: GRAVEDAD.luna.g, tol: 0.03 };
 RETO.t = tiempoCaida(RETO.h, RETO.g);
 
 // ---- Navegación ----
 const avisar = (t) => { const a = $('#aviso'); if (a) a.textContent = t; };
 function ir(v) {
-  if (v === 'siguiente') v = S.m1.completada ? 'mision2' : 'mision';
-  if (v === 'mision2' && !S.m1.completada) { v = 'mapa'; avisar('Completa la Misión 1 para desbloquear la Misión 2.'); } else avisar('');
+  if (!acceso) v = 'acceso';
+  if (v === 'docente' && !docente) v = 'curso';
+  $('#nav').hidden = !acceso;
+  if (v === 'siguiente') v = !S.m1.completada ? 'mision' : !S.m2.completada ? 'mision2' : 'mision3';
+  const bloq = docente ? '' : v === 'mision2' && !S.m1.completada ? 'Completa la Misión 1 para desbloquear la Misión 2.' : v === 'mision3' && !S.m2.completada ? 'Completa la Misión 2 para desbloquear la Misión 3.' : '';
+  if (bloq) v = 'mapa';
+  avisar(bloq);
   document.querySelectorAll('.view').forEach((e) => (e.hidden = e.id !== 'v-' + v));
   document.querySelectorAll('#nav button').forEach((b) =>
     b.dataset.go === v ? b.setAttribute('aria-current', 'page') : b.removeAttribute('aria-current'));
   if (v === 'mapa') pintarMapa();
+  if (v === 'docente') pintarDocente();
   $('#main').focus();
 }
 document.addEventListener('click', (e) => { const g = e.target.closest('[data-go]'); if (g) ir(g.dataset.go); });
 
+function guardarTodo() { guardar(S); pintarPR(); sync(); }
 function pintarPR() { $('#pr').textContent = S.pr; }
 function pintarMapa() {
   const m = S.m1, p = Math.round(((m.simulaciones > 0) + m.concepto + m.tiempo) / 3 * 100);
@@ -29,7 +39,9 @@ function pintarMapa() {
   const n = S.m2, q = Math.round((n.acierto + n.prediccion) / 2 * 100);
   $('#pg2').value = q;
   $('#b2').textContent = !m.completada ? 'Bloqueado' : n.completada ? 'Completado' : q ? 'En progreso · ' + q + ' %' : 'Disponible';
-  $('#b3').textContent = n.completada ? 'Desbloqueado · en construcción' : 'Bloqueado';
+  const r = S.m3, u = Math.round(((r.tipos.el && r.tipos.in && r.tipos.pi) + r.concepto + r.prediccion) / 3 * 100);
+  $('#pg3').value = u;
+  $('#b3').textContent = !n.completada ? 'Bloqueado' : r.completada ? 'Completado' : u ? 'En progreso · ' + u + ' %' : 'Disponible';
   pintarPR();
 }
 
@@ -77,7 +89,7 @@ function terminar() {
   if (sim.mA !== sim.mB) { if (otorgar(S, 'm1_sim', 10)) msg += ' +10 PR por contrastar dos masas distintas.'; }
   else msg += ' Usa masas distintas para obtener puntos.';
   $('#res').textContent = msg; $('#est').textContent = 'Estado: simulación terminada.';
-  guardar(S); pintarPR();
+  guardarTodo();
 }
 $('#soltar').onclick = () => {
   const d = leer(); if (!d) return;
@@ -131,9 +143,82 @@ $('#comprobar').onclick = () => {
   }
   const fb = $('#fb'); fb.textContent = '';
   out.forEach(([c, t]) => { const p = document.createElement('p'); p.className = 'fb-' + c; p.textContent = (c === 'ok' ? '✔ ' : '✖ ') + t; fb.append(p); });
-  guardar(S); pintarPR();
+  guardarTodo();
 };
-$('#borrar').onclick = () => { if (confirm('¿Borrar todo tu progreso?')) { S = reiniciar(); pintarPR(); pintarMapa(); } };
+$('#borrar').onclick = () => { if (confirm('¿Borrar todo tu progreso?')) { S = reiniciar(); guardarTodo(); pintarMapa(); } };
 
-iniciarMision2({ get S() { return S; }, repintar: () => { guardar(S); pintarPR(); } });
-pintarPR(); ir('curso');
+const juego = { get S() { return S; }, repintar: () => { guardarTodo(); } };
+iniciarMision2(juego); iniciarMision3(juego);
+
+// ---- Acceso, roles y nube ----
+let tSync;
+function sync() {
+  if (!nube.activa()) return;
+  clearTimeout(tSync);
+  tSync = setTimeout(async () => { $('#sync').textContent = (await nube.guardarProgreso(S)) ? 'Guardado en la nube' : 'Sin conexión: guardado solo en este navegador'; }, 800);
+}
+async function abrirSesion(r) {
+  if (r.modo === 'nube') {
+    usarUsuario(r.user.id);
+    const remoto = await nube.leerProgreso();
+    S = remoto ? normalizar(remoto) : cargar();
+    guardar(S);
+    docente = r.perfil.rol === 'docente';
+    $('#quien').textContent = r.perfil.alias + ' (' + r.perfil.rol + ')';
+    $('#sync').textContent = 'Conectado a la nube';
+  } else {
+    usarUsuario(null); S = cargar(); docente = false;
+    $('#quien').textContent = 'Modo local'; $('#sync').textContent = 'Progreso solo en este navegador';
+  }
+  acceso = true;
+  $('#salir').hidden = r.modo !== 'nube'; $('#nav-docente').hidden = !docente;
+  pintarPR(); ir('curso');
+}
+function mostrarAcceso(r) {
+  $('#form-acceso').hidden = r.modo !== 'login';
+  $('#local-box').hidden = r.modo !== 'local';
+  $('#acc-msg').textContent = r.modo === 'local' ? 'Sin conexión con la base de datos (' + r.motivo + '). Puedes continuar en modo local: el progreso se guarda solo en este navegador.' : (r.error || 'Inicia sesión con la cuenta que te dieron.');
+  ir('acceso');
+}
+async function arrancar() {
+  ir('acceso');
+  const r = await nube.iniciar();
+  if (r.modo === 'nube') abrirSesion(r); else mostrarAcceso(r);
+}
+$('#form-acceso').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const em = $('#email').value.trim(), pw = $('#clave').value;
+  if (!em || !pw) { $('#acc-err').textContent = 'Escribe el correo y la contraseña.'; return; }
+  $('#acc-err').textContent = ''; $('#entrar').disabled = true;
+  const r = await nube.entrar(em, pw);
+  $('#entrar').disabled = false;
+  if (r.error) { $('#acc-err').textContent = r.error; return; }
+  $('#clave').value = ''; abrirSesion(r);
+});
+$('#btn-local').onclick = () => abrirSesion({ modo: 'local' });
+$('#salir').onclick = async () => {
+  await nube.salir(); acceso = false; docente = false; S = normalizar(null);
+  $('#quien').textContent = ''; $('#sync').textContent = ''; $('#salir').hidden = true; $('#nav-docente').hidden = true; pintarPR();
+  arrancar();
+};
+
+// ---- Panel docente ----
+const num = (x) => Number(x) || 0;
+const estadoM = (m, act) => (m && m.completada ? 'Completada' : m && act ? 'En curso' : 'Sin iniciar');
+async function pintarDocente() {
+  const tb = $('#tabla-doc'), msg = $('#doc-msg');
+  msg.textContent = 'Cargando resultados…'; tb.textContent = '';
+  const r = await nube.listarEstudiantes();
+  if (r.error) { msg.textContent = r.error; return; }
+  msg.textContent = r.filas.length ? '' : 'Aún no hay estudiantes registrados.';
+  const fila = (celdas, th) => { const tr = tb.insertRow(); celdas.forEach((t, i) => { const c = document.createElement(th || i === 0 ? 'th' : 'td'); if (th) c.scope = 'col'; else if (i === 0) c.scope = 'row'; c.textContent = t; tr.append(c); }); };
+  fila(['Estudiante', 'PR', 'Misión 1', 'Misión 2', 'Misión 3', 'Verificaciones', 'Simulaciones', 'Última actualización'], true);
+  r.filas.forEach((f) => {
+    const e = normalizar(f.estado);
+    fila([f.alias, num(f.pr), estadoM(e.m1, e.m1.simulaciones || e.m1.intentos), estadoM(e.m2, e.m2.lanzamientos || e.m2.intentos), estadoM(e.m3, e.m3.colisiones || e.m3.intentos),
+      num(e.m1.intentos) + num(e.m2.intentos) + num(e.m3.intentos), num(e.m1.simulaciones) + num(e.m2.lanzamientos) + num(e.m3.colisiones),
+      f.actualizado ? new Date(f.actualizado).toLocaleString('es') : '–']);
+  });
+}
+$('#refrescar').onclick = pintarDocente;
+arrancar();

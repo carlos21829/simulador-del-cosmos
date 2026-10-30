@@ -2,6 +2,7 @@
 import assert from 'node:assert/strict';
 import { tiempoCaida, estado, validar as vCaida } from '../js/physics/free-fall.js';
 import { ideal, alcanceMismaAltura, trayectoria, evaluar, validar as vTiro, C_ARRASTRE } from '../js/physics/projectile.js';
+import { analizar, colisionar, posiciones, tContacto, validar as vCol, ANCHO } from '../js/physics/collisions.js';
 const cerca = (a, b, tol = 1e-9) => assert.ok(Math.abs(a - b) <= tol * Math.max(1, Math.abs(b)), `${a} ≠ ${b}`);
 const g = 9.81; let n = 0;
 const t = (nombre, f) => { f(); n++; console.log('✔', nombre); };
@@ -19,4 +20,13 @@ t('Evaluar: acierto cuando cae en el objetivo', () => assert.equal(evaluar(traye
 t('Evaluar: corto y largo', () => { const p = trayectoria(30, 45, 0, g, 0).pts; assert.equal(evaluar(p, 150).estado, 'corto'); assert.equal(evaluar(p, 70).estado, 'largo'); });
 t('Evaluar: tiro rasante choca con el obstáculo', () => assert.equal(evaluar(trayectoria(30, 20, 0, g, 0).pts, 120).estado, 'obstaculo'));
 t('Tiro: validación de límites', () => { assert.equal(vTiro(30, 45, 0, 120), ''); assert.notEqual(vTiro(30, 0, 0, 120), ''); assert.notEqual(vTiro(30, 45, 0, 40), ''); });
+const CASOS = [[4, 6, 2, 0], [3, 8, 5, -2], [1, 10, 100, -5], [50, 3, 0.5, -15], [7, 2, 7, 1]];
+t('Colisión: el momento total se conserva con e = 0, 0.5 y 1', () => CASOS.forEach(([mA, vA, mB, vB]) => [0, 0.5, 1].forEach((e) => { const a = analizar({ mA, vA, mB, vB, e }); cerca(a.despues.p, a.antes.p, 1e-12); })));
+t('Colisión elástica: la energía cinética se conserva', () => CASOS.forEach(([mA, vA, mB, vB]) => { const a = analizar({ mA, vA, mB, vB, e: 1 }); cerca(a.despues.k, a.antes.k, 1e-12); }));
+t('Colisión elástica con masas iguales: intercambian velocidades', () => { const f = colisionar(5, 6, 5, 0, 1); cerca(f.vA, 0, 1e-12); cerca(f.vB, 6, 1e-12); });
+t('Perfectamente inelástica: quedan unidos con v = p/M', () => { const f = colisionar(3, 8, 5, -2, 0); cerca(f.vA, 1.75, 1e-12); cerca(f.vB, 1.75, 1e-12); });
+t('Energía cinética esperada (otra fórmula) = calculada, para todo e', () => CASOS.forEach(([mA, vA, mB, vB]) => [0, 0.3, 0.7, 1].forEach((e) => { const a = analizar({ mA, vA, mB, vB, e }); cerca(a.despues.k, a.esperado.k, 1e-9); })));
+t('Inelástica: se pierde energía cinética', () => { const a = analizar({ mA: 4, vA: 6, mB: 2, vB: 0, e: 0.5 }); assert.ok(a.despues.k < a.antes.k); });
+t('Colisión: al contacto la separación es el ancho del rover', () => { const d = { mA: 4, vA: 6, mB: 2, vB: 0, e: 0 }, f = colisionar(4, 6, 2, 0, 0), p = posiciones(d, f, tContacto(d)); cerca(p.xB - p.xA, ANCHO, 1e-12); });
+t('Colisión: validación (deben acercarse)', () => { const b = { mA: 4, mB: 2, vA: 6, vB: 0, tipo: 'elastica', e: 1 }; assert.equal(vCol(b), ''); assert.notEqual(vCol({ ...b, vA: 0 }), ''); assert.notEqual(vCol({ ...b, mA: 0 }), ''); assert.notEqual(vCol({ ...b, tipo: 'inelastica', e: 1.5 }), ''); });
 console.log(`\n${n} pruebas superadas`);

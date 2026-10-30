@@ -32,3 +32,4 @@ table{border-collapse:collapse;width:100%}td,th{border:1px solid var(--line);pad
 .err{color:var(--bad);font-weight:700;min-height:1.4em}.fb-ok{color:var(--ok);font-weight:700}.fb-bad{color:var(--bad);font-weight:700}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 .ctrl .chk{display:flex;align-items:center;gap:.4rem;align-self:end}.nota{font-size:.85rem;opacity:.85}th[scope=row]{width:55%}
+#form-acceso label{display:grid;gap:.2rem;font-weight:600;margin:.5rem 0}input[type=email],input[type=password]{width:100%;max-width:22rem}.scroll{overflow-x:auto}.quien{display:flex;gap:.5rem;align-items:center;font-size:.9rem}
