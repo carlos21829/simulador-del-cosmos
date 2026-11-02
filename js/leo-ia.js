@@ -9,7 +9,8 @@ export function iniciarLeoIA(juego) {
     e.preventDefault();
     const pregunta = $('#leo-pregunta').value.trim(), m = Number($('#leo-mision').value);
     if (!pregunta) { out.textContent = 'Escribe tu pregunta primero.'; return; }
-    if (!LEO_URL.startsWith('https://') || !nube.activa()) { out.textContent = 'L.E.O. con IA no está disponible (requiere iniciar sesión y que el servicio esté configurado). Usa las pistas de cada misión.'; return; }
+    if (!LEO_URL.startsWith('https://')) { out.textContent = 'L.E.O. con IA no está configurado: la dirección del servicio en js/leo-config.js debe empezar por https://. Usa las pistas de cada misión.'; return; }
+    if (!nube.activa()) { out.textContent = 'Inicia sesión para usar L.E.O. con IA. Mientras tanto, usa las pistas de cada misión.'; return; }
     btn.disabled = true; out.textContent = 'L.E.O. está pensando…';
     try {
       const token = await nube.token(), mm = juego.S['m' + m];
@@ -19,7 +20,7 @@ export function iniciarLeoIA(juego) {
       });
       const d = await r.json().catch(() => ({}));
       out.textContent = r.ok && d.texto ? d.texto : (d.error || 'No se pudo obtener respuesta. Usa las pistas de la misión.');
-    } catch { out.textContent = 'No hay conexión con L.E.O. con IA. Usa las pistas de cada misión.'; }
+    } catch { out.textContent = 'No hay conexión con el servicio de L.E.O. (revisa la dirección del Worker, que ALLOWED_ORIGINS incluya el origen de tu sitio y tu conexión). Usa las pistas de cada misión.'; }
     finally { setTimeout(() => { btn.disabled = false; }, 3000); }
   });
 }
